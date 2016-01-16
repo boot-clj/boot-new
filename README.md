@@ -6,7 +6,7 @@ Early version of new (template) task for Boot, based on Leiningen's template mac
 
 You can specify a template and a project name:
 
-    boot -d seancorfield/boot-new -t template-name -n project-name
+    boot -d seancorfield/boot-new:0.1.0-SNAPSHOT -t template-name -n project-name
 
 ## License
 
