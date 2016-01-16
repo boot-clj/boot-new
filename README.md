@@ -10,6 +10,6 @@ You can specify a template and a project name:
 
 ## License
 
-Copyright © 2016 Sean Corfield
+Copyright © 2016 Sean Corfield and the Leiningen Team for much of the code -- thank you!
 
 Distributed under the Eclipse Public License version 1.0.
