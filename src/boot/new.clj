@@ -1,7 +1,8 @@
 (ns boot.new
   "Generate project scaffolding based on a template.
   Adapted from leiningen.new, with permission of the Leiningen team."
-  (:refer-clojure :exclude [new list])
+  {:boot/export-tasks true}
+  (:refer-clojure :exclude [new])
   (:require [boot.core :as boot :refer [deftask]]
             [bultitude.core :as bultitude]
             [leiningen.core.classpath :as cp]
@@ -92,7 +93,7 @@
 ;; get the metadata off of that function to list the names and docs
 ;; for all of the available templates.
 
-(defn list []
+(defn lib-list []
   (for [n (bultitude/namespaces-on-classpath :prefix "leiningen.new.")
         ;; There are things on the classpath at `leiningen.new` that we
         ;; don't care about here. We could use a regex here, but meh.
@@ -101,7 +102,7 @@
         (the-ns)
         (ns-resolve (symbol (last (.split (str n) "\\.")))))))
 
-(defn show
+(defn template-show
   "Show details for a given template."
   [name]
   (let [resolved (meta (resolve-template name))]
@@ -136,8 +137,8 @@
 (defn ^{:no-project-needed true
         :help-arglists '[[project project-name]
                          [project template project-name [-- & args]]]
-        :subtasks (list)}
-  new
+        :subtasks (lib-list)}
+  lein-new
   "Generate scaffolding for a new project based on a template.
 
 If only one argument is passed to the \"new\" task, the default template
@@ -196,7 +197,7 @@ lein-new Leiningen plug-in."
         (if-let [show-template (or (and (true? (:show options))
                                         new-project-name)
                                    (:show options) (:--show options))]
-          (show show-template)
+          (template-show show-template)
           (binding [*dir* (or (:to-dir options) (:--to-dir options))
                     *use-snapshots?* (or (:snapshot options)
                                          (:--snapshot options))
@@ -205,3 +206,12 @@ lein-new Leiningen plug-in."
                     *force?* (or (:force options) (:--force options))]
             (apply create (or template-name "default")
                    new-project-name template-args)))))))
+
+(ns-unmap *ns* 'new)
+
+(deftask new
+  "Generate a new project from a template."
+  [t template TEMPLATE str "the template to use"
+   n name     NAME     str "the name of the project to generate"]
+  (boot/with-pass-thru fs
+    (lein-new {} template name)))

@@ -20,11 +20,3 @@
 (deftask deploy
   [g gpg-sign bool "Sign jar using GPG private key."]
   (comp (pom) (jar) (apply push (mapcat identity *opts*))))
-
-
-(deftask new
-  "Generate a new project from a template."
-  [t template TEMPLATE str "the template to use"
-   n name     NAME     str "the name of the project to generate"]
-  (require 'boot.new)
-  ((resolve 'boot.new/new) {} template name))
