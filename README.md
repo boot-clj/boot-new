@@ -6,11 +6,11 @@ A Boot task that generates projects from Leiningen templates.
 
 You can specify a template and a project name:
 
-    boot -d seancorfield/boot-new:0.1.0-SNAPSHOT new -t template-name -n project-name
+    boot -d seancorfield/boot-new new -t template-name -n project-name
 
 For other options, ask `new` for help:
 
-    boot -d seancorfield/boot-new:0.1.0-SNAPSHOT new -h
+    boot -d seancorfield/boot-new new -h
 
 Currently all of the basic options from Leiningen's `new` task are supported, although there are no built-in templates.
 
