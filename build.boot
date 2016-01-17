@@ -3,7 +3,7 @@
                           [leiningen-core "2.5.3"]
                           [stencil "0.5.0"]])
 
-(def version "0.1.0")
+(def version "0.2.0-SNAPSHOT")
 
 (task-options!
  pom {:project     'seancorfield/boot-new

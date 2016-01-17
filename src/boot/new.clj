@@ -4,109 +4,108 @@
   {:boot/export-tasks true}
   (:refer-clojure :exclude [new])
   (:require [boot.core :as boot :refer [deftask]]
+            [boot.new.templates :as bnt]
             [boot.util :as util]
+
             [bultitude.core :as bultitude]
-            [leiningen.core.classpath :as cp]
-            [leiningen.core.project :as project]
-            [leiningen.core.user :as user]
-            [leiningen.core.main :refer [abort parse-options option-arg]]
-            [leiningen.new.templates :refer [*dir* *force?*]])
+
+            [leiningen.core.classpath :as lein-cp]
+            [leiningen.core.project :as lein-project]
+            [leiningen.core.user :as lein-user]
+            [leiningen.new.templates :as lnt])
   (:import java.io.FileNotFoundException))
 
 (def ^:dynamic *use-snapshots?* false)
 (def ^:dynamic *template-version* nil)
 
-(defn- fake-project [name]
-  (let [template-symbol (symbol name "lein-template")
+(defn- fake-project
+  "Given a template name and a type (boot, lein), return a minimal fake
+  Leiningen project for use with resolve-dependencies."
+  [template-name type]
+  (let [template-symbol (symbol template-name (str type "-template"))
         template-version (cond *template-version* *template-version*
                                *use-snapshots?*   "(0.0.0,)"
                                :else              "RELEASE")
-        user-profiles (:user (user/profiles))
+        user-profiles (:user (lein-user/profiles))
         repositories (reduce
-                      (:reduce (meta project/default-repositories))
-                      project/default-repositories
+                      (:reduce (meta lein-project/default-repositories))
+                      lein-project/default-repositories
                       (:plugin-repositories user-profiles))]
     (merge {:templates [[template-symbol template-version]]
             :repositories repositories}
            (select-keys user-profiles [:mirrors]))))
 
-(defn resolve-remote-template [name sym]
-  (try (cp/resolve-dependencies :templates (fake-project name) :add-classpath? true)
-       (require sym)
-       true
-       (catch clojure.lang.Compiler$CompilerException e
-         (abort (str "Could not load template, failed with: " (.getMessage e))))
-       (catch Exception e nil)))
+(defn resolve-remote-template
+  "Given a template name, attempt to resolve it as a Boot template first,
+  then as a Leiningen template. Return the type of template we found."
+  [template-name]
+  (let [selected (atom nil)
+        failure  (atom nil)
+        output
+        (with-out-str
+          (binding [*err* *out*]
+            (try
+              (lein-cp/resolve-dependencies :templates (fake-project template-name "boot") :add-classpath? true)
+              (reset! selected :boot)
+              (catch Exception e
+                (reset! failure e)
+                (try
+                  (lein-cp/resolve-dependencies :templates (fake-project template-name "lein") :add-classpath? true)
+                  (reset! selected :leiningen)
+                  (catch Exception e
+                    (reset! failure e)))))))]
+    (if @selected
+      (try
+        (require (symbol (str (name @selected) ".new." template-name)))
+        @selected
+        (catch Exception e
+          (util/exit-error (println "Could not load template, failed with:" (.getMessage e)))))
+      (util/exit-error (println output)
+                       (println "Could not load template, failed with:" (.getMessage @failure))))))
 
-(defn resolve-template [name]
-  (let [sym (symbol (str "leiningen.new." name))]
-    (if (try (require sym)
-             true
-             (catch FileNotFoundException _
-               (resolve-remote-template name sym)))
-      (resolve (symbol (str sym "/" name)))
-      (abort "Could not find template" name "on the classpath."))))
+(defn resolve-template
+  "Given a template name, resolve it to a symbol (or exit if not possible)."
+  [template-name]
+  (if-let [type (try (require (symbol (str "boot.new." template-name)))
+                     :boot
+                     (catch FileNotFoundException _
+                       (resolve-remote-template template-name)))]
+    (resolve (symbol (str (name type) ".new." template-name) template-name))
+    (util/exit-error (println "Could not find template" template-name "on the classpath."))))
 
-;; A lein-newnew template is actually just a function that generates files and
-;; directories. We have a bit of convention: we expect that each template is on
-;; the classpath and is based in a .clj file at `leiningen/new/`. Making this
-;; assumption, users can simply give us the name of the template they wish to
-;; use and we can `require` it without searching the classpath for it or doing
-;; other time consuming things. If this namespace isn't found and we are
-;; running Leiningen 2, we can resolve it via pomegranate first.
-;;
-;; Since our templates are just function calls just like Leiningen tasks, we can
-;; also expect that a template generation function also be named the same as the
-;; last segment of its namespace. This is what we call to generate the project.
 (defn create
-  [template name & args]
+  "Given a template name, a project name and list of template arguments,
+  perform sanity checking on the project name and, if it's sane, then
+  generate the project from the template."
+  [template-name project-name args]
   (cond
-    (and (re-find #"(?i)(?<!(clo|compo))jure" name)
-         (not (System/getenv "LEIN_IRONIC_JURE")))
-    (abort "Sorry, names such as clojure or *jure are not allowed."
-           "\nIf you intend to use this name ironically, please set the"
-           "\nLEIN_IRONIC_JURE environment variable and try again.")
-    (and (re-find #"(?i)(?<!(cl|comp))eaxure" name)
-         (not (System/getenv "LEIN_IRONIC_EAXURE")))
-    (abort "Sorry, names such as cleaxure or *eaxure are not allowed."
-           "\nIf you intend to use this name ironically, please set the"
-           "\nLEIN_IRONIC_EAXURE environment variable and try again.")
-    (= name "clojure")
-    (abort "Sorry, clojure can't be used as a project name."
-           "\nIt will confuse Clojure compiler and cause obscure issues.")
-    (and (re-find #"[A-Z]" name)
-         (not (System/getenv "LEIN_BREAK_CONVENTION")))
-    (abort "Project names containing uppercase letters are not recommended"
-           "\nand will be rejected by repositories like Clojars and Central."
-           "\nIf you're truly unable to use a lowercase name, please set the"
-           "\nLEIN_BREAK_CONVENTION environment variable and try again.")
-    (not (symbol? (try (read-string name) (catch Exception _))))
-    (abort "Project names must be valid Clojure symbols.")
-    :else (apply (resolve-template template) name args)))
-
-;; Since we have our convention of templates always being at
-;; `leiningen.new.<template>`, we can easily search the classpath
-;; to find templates in the same way that Leiningen can search to
-;; find tasks. Furthermore, since our templates will always have a
-;; function named after the template that is the entry-point, we can
-;; also expect that it has the documentation for the template. We can
-;; just look up these templates on the classpath, require them, and then
-;; get the metadata off of that function to list the names and docs
-;; for all of the available templates.
-
-(defn lib-list []
-  (for [n (bultitude/namespaces-on-classpath :prefix "leiningen.new.")
-        ;; There are things on the classpath at `leiningen.new` that we
-        ;; don't care about here. We could use a regex here, but meh.
-        :when (not= n 'leiningen.new.templates)]
-    (-> (doto n require)
-        (the-ns)
-        (ns-resolve (symbol (last (.split (str n) "\\.")))))))
+    (and (re-find #"(?i)(?<!(clo|compo))jure" project-name)
+         (not (System/getenv "BOOT_IRONIC_JURE")))
+    (util/exit-error (println "Sorry, names such as clojure or *jure are not allowed."
+                              "\nIf you intend to use this name ironically, please set the"
+                              "\nBOOT_IRONIC_JURE environment variable and try again."))
+    (and (re-find #"(?i)(?<!(cl|comp))eaxure" project-name)
+         (not (System/getenv "BOOT_IRONIC_EAXURE")))
+    (util/exit-error (println "Sorry, names such as cleaxure or *eaxure are not allowed."
+                              "\nIf you intend to use this name ironically, please set the"
+                              "\nBOOT_IRONIC_EAXURE environment variable and try again."))
+    (= project-name "clojure")
+    (util/exit-error (println "Sorry, clojure can't be used as a project name."
+                              "\nIt will confuse Clojure compiler and cause obscure issues."))
+    (and (re-find #"[A-Z]" project-name)
+         (not (System/getenv "BOOT_BREAK_CONVENTION")))
+    (util/exit-error (println "Project names containing uppercase letters are not recommended"
+                              "\nand will be rejected by repositories like Clojars and Central."
+                              "\nIf you're truly unable to use a lowercase name, please set the"
+                              "\nBOOT_BREAK_CONVENTION environment variable and try again."))
+    (not (symbol? (try (read-string project-name) (catch Exception _))))
+    (util/exit-error (println "Project names must be valid Clojure symbols."))
+    :else (apply (resolve-template template-name) project-name args)))
 
 (defn template-show
   "Show details for a given template."
-  [name]
-  (let [resolved (meta (resolve-template name))]
+  [template-name]
+  (let [resolved (meta (resolve-template template-name))]
     (println (:doc resolved "No documentation available."))
     (println)
     (println "Argument list:" (or (:help-arglists resolved)
@@ -137,8 +136,10 @@ specify the template with -t / --template."
             (not name)
             (util/exit-error (println "Project name is required (-n, --name)."))
 
-            :else (binding [*dir*              to-dir
-                            *use-snapshots?*   snapshot
+            :else (binding [*use-snapshots?*   snapshot
                             *template-version* template-version
-                            *force?*           force]
-                    (apply create template name args))))))
+                            bnt/*dir*          to-dir
+                            bnt/*force?*       force
+                            lnt/*dir*          to-dir
+                            lnt/*force?*       force]
+                    (create template name args))))))
