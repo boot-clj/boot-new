@@ -4,6 +4,7 @@
   {:boot/export-tasks true}
   (:refer-clojure :exclude [new])
   (:require [boot.core :as boot :refer [deftask]]
+            [boot.util :as util]
             [bultitude.core :as bultitude]
             [leiningen.core.classpath :as cp]
             [leiningen.core.project :as project]
@@ -22,9 +23,9 @@
                                :else              "RELEASE")
         user-profiles (:user (user/profiles))
         repositories (reduce
-                       (:reduce (meta project/default-repositories))
-                       project/default-repositories
-                       (:plugin-repositories user-profiles))]
+                      (:reduce (meta project/default-repositories))
+                      project/default-repositories
+                      (:plugin-repositories user-profiles))]
     (merge {:templates [[template-symbol template-version]]
             :repositories repositories}
            (select-keys user-profiles [:mirrors]))))
@@ -60,28 +61,28 @@
 (defn create
   [template name & args]
   (cond
-   (and (re-find #"(?i)(?<!(clo|compo))jure" name)
-        (not (System/getenv "LEIN_IRONIC_JURE")))
-   (abort "Sorry, names such as clojure or *jure are not allowed."
-          "\nIf you intend to use this name ironically, please set the"
-          "\nLEIN_IRONIC_JURE environment variable and try again.")
-   (and (re-find #"(?i)(?<!(cl|comp))eaxure" name)
-        (not (System/getenv "LEIN_IRONIC_EAXURE")))
-   (abort "Sorry, names such as cleaxure or *eaxure are not allowed."
-          "\nIf you intend to use this name ironically, please set the"
-          "\nLEIN_IRONIC_EAXURE environment variable and try again.")
-   (= name "clojure")
-   (abort "Sorry, clojure can't be used as a project name."
-          "\nIt will confuse Clojure compiler and cause obscure issues.")
-   (and (re-find #"[A-Z]" name)
-        (not (System/getenv "LEIN_BREAK_CONVENTION")))
-   (abort "Project names containing uppercase letters are not recommended"
-          "\nand will be rejected by repositories like Clojars and Central."
-          "\nIf you're truly unable to use a lowercase name, please set the"
-          "\nLEIN_BREAK_CONVENTION environment variable and try again.")
-   (not (symbol? (try (read-string name) (catch Exception _))))
-   (abort "Project names must be valid Clojure symbols.")
-   :else (apply (resolve-template template) name args)))
+    (and (re-find #"(?i)(?<!(clo|compo))jure" name)
+         (not (System/getenv "LEIN_IRONIC_JURE")))
+    (abort "Sorry, names such as clojure or *jure are not allowed."
+           "\nIf you intend to use this name ironically, please set the"
+           "\nLEIN_IRONIC_JURE environment variable and try again.")
+    (and (re-find #"(?i)(?<!(cl|comp))eaxure" name)
+         (not (System/getenv "LEIN_IRONIC_EAXURE")))
+    (abort "Sorry, names such as cleaxure or *eaxure are not allowed."
+           "\nIf you intend to use this name ironically, please set the"
+           "\nLEIN_IRONIC_EAXURE environment variable and try again.")
+    (= name "clojure")
+    (abort "Sorry, clojure can't be used as a project name."
+           "\nIt will confuse Clojure compiler and cause obscure issues.")
+    (and (re-find #"[A-Z]" name)
+         (not (System/getenv "LEIN_BREAK_CONVENTION")))
+    (abort "Project names containing uppercase letters are not recommended"
+           "\nand will be rejected by repositories like Clojars and Central."
+           "\nIf you're truly unable to use a lowercase name, please set the"
+           "\nLEIN_BREAK_CONVENTION environment variable and try again.")
+    (not (symbol? (try (read-string name) (catch Exception _))))
+    (abort "Project names must be valid Clojure symbols.")
+    :else (apply (resolve-template template) name args)))
 
 ;; Since we have our convention of templates always being at
 ;; `leiningen.new.<template>`, we can easily search the classpath
@@ -111,107 +112,34 @@
     (println "Argument list:" (or (:help-arglists resolved)
                                   (:arglists resolved)))))
 
-(def ^{:dynamic true :doc "Bound to project map at runtime"} *project* nil)
-
-(defn- project-name-specified? [[first-arg & _]]
-  (and first-arg (not (option-arg first-arg))))
-
-(defn- template-specified? [[_ second-arg & _]]
-  (and second-arg (not (option-arg second-arg))))
-
-(defn- parse-args [[first-arg second-arg & opts :as args]]
-  (if (project-name-specified? args)
-    (let [template-name (if (template-specified? args) first-arg nil)
-          new-project-name (if (template-specified? args) second-arg first-arg)
-          options (parse-options (if (template-specified? args)
-                                   opts
-                                   (if second-arg
-                                     (cons second-arg opts) opts)))]
-      [template-name new-project-name options])
-    [nil nil (parse-options args)]))
-
-(defn- print-help []
-  (require 'leiningen.help)
-  ((ns-resolve 'leiningen.help 'help) nil "new"))
-
-(defn ^{:no-project-needed true
-        :help-arglists '[[project project-name]
-                         [project template project-name [-- & args]]]
-        :subtasks (lib-list)}
-  lein-new
-  "Generate scaffolding for a new project based on a template.
-
-If only one argument is passed to the \"new\" task, the default template
-is used and the argument is used as the name of the project.
-
-If two arguments are passed, the first should be the name of a template,
-and the second is used as the name of the project, for example:
-
-    lein new $TEMPLATE_NAME $PROJECT_NAME
-
-To generate to a directory different than your project's name use --to-dir:
-
-    lein new $TEMPLATE_NAME $PROJECT_NAME --to-dir $DIR
-
-By default, the \"new\" task will not write to an existing directory.
-Supply the --force option to override this behavior:
-
-    lein new $TEMPLATE_NAME $PROJECT_NAME --force
-    lein new $TEMPLATE_NAME $PROJECT_NAME --to-dir $DIR --force
-
-Arguments can be passed to templates by adding them after \"new\"'s options. Use
-`--` to separate arguments to lein new and the actual template you are using:
-
-    lein new $TEMPLATE_NAME $PROJECT_NAME --to-dir $DIR -- template-arg-1 template-arg-2
-
-If you'd like to use an unreleased (ie, SNAPSHOT) template, pass in --snapshot:
-
-    lein new $TEMPLATE_NAME $PROJECT_NAME --snapshot
-
-If you'd rather like to use a specific version of template, specify the version
-with --template-version option:
-
-    lein new $TEMPLATE_NAME $PROJECT_NAME --template-version $TEMPLATE_VERSION
-
-If you use the `--snapshot` or `--template-version` argument with template args
-you may need to use `--` to prevent template args from being interpreted as
-arguments to `lein new`:
-
-    lein new $TEMPLATE_NAME $PROJECT_NAME --snapshot -- template-arg-1 template-arg-2
-
-Third-party templates can be found at https://clojars.org/search?q=lein-template.
-When creating a new project from a third-party template, use its group-id
-as the template name. Note that there's no need to \"install\" a given third-
-party template --- lein will automatically fetch it for you.
-
-Use `lein new :show $TEMPLATE` to see details about a given template.
-
-To create a new template of your own, see the documentation for the
-lein-new Leiningen plug-in."
-  [project & args]
-  (binding [*project* project]
-    (let [[template-name new-project-name
-           [options template-args]] (parse-args args)]
-      (if (or (:--help options) (empty? args))
-        (print-help)
-        (if-let [show-template (or (and (true? (:show options))
-                                        new-project-name)
-                                   (:show options) (:--show options))]
-          (template-show show-template)
-          (binding [*dir* (or (:to-dir options) (:--to-dir options))
-                    *use-snapshots?* (or (:snapshot options)
-                                         (:--snapshot options))
-                    *template-version* (or (:template-version options)
-                                           (:--template-version options))
-                    *force?* (or (:force options) (:--force options))]
-            (apply create (or template-name "default")
-                   new-project-name template-args)))))))
-
 (ns-unmap *ns* 'new)
 
 (deftask new
-  "Generate a new project from a template."
-  [t template TEMPLATE str "the template to use"
-   n name     NAME     str "the name of the project to generate"]
-  (boot/with-pass-thru fs
-    (lein-new {} template name)))
+  "Generate a new project from a template. The long form arguments mostly
+follow those of `lein new` except that -n / --name is required and you
+specify the template with -t / --template."
+  [a args             ARG      [str] "arguments for the template itself."
+   f force                     bool  "Force Boot new to overwrite existing directory."
+   n name             NAME     str   "generated project name"
+   o to-dir           DIR      str   "directory to use instead of NAME"
+   s show                      bool  "Show documentation for the template."
+   S snapshot                  bool  "Look for a SNAPSHOT version of the template."
+   t template         TEMPLATE str   "the template to use"
+   V template-version VER      str   "the version of the template to use"]
+
+  (let [template (or template "default")]
+
+    (boot/with-pass-thru fs
+
+      (cond show
+            (template-show template)
+
+            (not name)
+            (util/exit-error (println "Project name is required (-n, --name)."))
+
+            :else (binding [*project*          {}
+                            *dir*              to-dir
+                            *use-snapshots?*   snapshot
+                            *template-version* template-version
+                            *force?*           force]
+                    (apply create template name args))))))
