@@ -137,8 +137,7 @@ specify the template with -t / --template."
             (not name)
             (util/exit-error (println "Project name is required (-n, --name)."))
 
-            :else (binding [*project*          {}
-                            *dir*              to-dir
+            :else (binding [*dir*              to-dir
                             *use-snapshots?*   snapshot
                             *template-version* template-version
                             *force?*           force]
