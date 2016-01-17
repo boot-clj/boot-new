@@ -1,3 +1,4 @@
+[![Stories in Ready](https://badge.waffle.io/seancorfield/boot-new.png?label=ready&title=Ready)](https://waffle.io/seancorfield/boot-new)
 # boot-new
 
 A Boot task that generates projects from Leiningen templates.
