@@ -20,6 +20,4 @@
   []
   (comp (pom) (jar) (install)))
 
-(ns-unmap *ns* 'test)
-
 (require '[adzerk.boot-test :refer [test]])
