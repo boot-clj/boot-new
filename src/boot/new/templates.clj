@@ -1,6 +1,7 @@
 (ns boot.new.templates
   "Boot version of leiningen.new.templates. Initially a direct copy
-  of leiningen.new.templates but will diverge over time."
+  of leiningen.new.templates (modified to depend on Boot code instead
+  of Leiningen code), but will likely diverge over time."
   (:require [boot.util :as util]
             [clojure.java.io :as io]
             [clojure.string :as string]

@@ -1,4 +1,7 @@
 (ns leiningen.new.templates
+  "Adapted from Leiningen's code by removing dependencies on
+  Leiningen itself and using Boot instead. Present purely to
+  support Leiningen templates which use symbols in this ns."
   (:require [boot.util :as util]
             [clojure.java.io :as io]
             [clojure.string :as string]
