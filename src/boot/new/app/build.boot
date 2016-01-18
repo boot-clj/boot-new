@@ -20,4 +20,10 @@
   []
   (comp (pom) (jar) (install)))
 
+(deftask run
+  "Run the project."
+  [a args ARG [str] "the arguments for the application."]
+  (require '[{{namespace}} :as app])
+  (apply (resolve 'app/-main) args))
+
 (require '[adzerk.boot-test :refer [test]])

@@ -1,7 +1,7 @@
 [![Stories in Ready](https://badge.waffle.io/seancorfield/boot-new.png?label=ready&title=Ready)](https://waffle.io/seancorfield/boot-new)
 # boot-new
 
-A Boot task that generates projects from Leiningen templates.
+A Boot task that generates projects from Leiningen templates or Boot templates.
 
 ## Usage
 
@@ -13,12 +13,14 @@ For other options, ask `new` for help:
 
     boot -d seancorfield/boot-new new -h
 
-Currently all of the basic options from Leiningen's `new` task are supported, although there are no built-in templates.
+Currently all of the basic options from Leiningen's `new` task are supported, and the built-in templates (`app`, `default`, `task`, `template`) are works in progress.
+
+## Boot Templates
+
+Boot templates are very similar to Leiningen templates but have an artifact name based on `boot-template` instead of `lein-template` and `boot` instead of `leiningen` in all the namespaces names. The built-in templates for Boot new are Boot templates, that produce Boot projects.
 
 ## Roadmap
 
-* Add support for "Boot templates" -- with `boot-template` in the artifact name, instead of `lein-template`, and with `boot` in the namespace names, instead of `leiningen`.
-* Add built-in Boot templates for `app`, `default`, `task`, `template`.
 * Add "generate" task that can add new pieces to an existing project, based on a template.
 
 ## License
