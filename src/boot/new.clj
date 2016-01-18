@@ -9,31 +9,11 @@
 
             [bultitude.core :as bultitude]
 
-            [leiningen.core.classpath :as lein-cp]
-            [leiningen.core.project :as lein-project]
-            [leiningen.core.user :as lein-user]
             [leiningen.new.templates :as lnt])
   (:import java.io.FileNotFoundException))
 
 (def ^:dynamic *use-snapshots?* false)
 (def ^:dynamic *template-version* nil)
-
-(defn- fake-project
-  "Given a template name and a type (boot, lein), return a minimal fake
-  Leiningen project for use with resolve-dependencies."
-  [template-name type]
-  (let [template-symbol (symbol template-name (str type "-template"))
-        template-version (cond *template-version* *template-version*
-                               *use-snapshots?*   "(0.0.0,)"
-                               :else              "RELEASE")
-        user-profiles (:user (lein-user/profiles))
-        repositories (reduce
-                      (:reduce (meta lein-project/default-repositories))
-                      lein-project/default-repositories
-                      (:plugin-repositories user-profiles))]
-    (merge {:templates [[template-symbol template-version]]
-            :repositories repositories}
-           (select-keys user-profiles [:mirrors]))))
 
 (defn resolve-remote-template
   "Given a template name, attempt to resolve it as a Boot template first,
@@ -45,12 +25,18 @@
         (with-out-str
           (binding [*err* *out*]
             (try
-              (lein-cp/resolve-dependencies :templates (fake-project template-name "boot") :add-classpath? true)
+              (boot/merge-env! :dependencies [[(symbol (str template-name "/boot-template"))
+                                               (cond *template-version* *template-version*
+                                                     *use-snapshots?*   "(0.0.0,)"
+                                                     :else              "RELEASE")]])
               (reset! selected :boot)
               (catch Exception e
                 (reset! failure e)
                 (try
-                  (lein-cp/resolve-dependencies :templates (fake-project template-name "lein") :add-classpath? true)
+                  (boot/merge-env! :dependencies [[(symbol (str template-name "/lein-template"))
+                                                   (cond *template-version* *template-version*
+                                                         *use-snapshots?*   "(0.0.0,)"
+                                                         :else              "RELEASE")]])
                   (reset! selected :leiningen)
                   (catch Exception e
                     (reset! failure e)))))))]

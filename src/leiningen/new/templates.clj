@@ -1,19 +1,7 @@
-;; You can write a 'new' task yourself without any extra plugins like
-;; lein-newnew. What makes lein-new so useful is the `templates` task for
-;; listing templates and this file. The primary problem with writing your
-;; own project scaffolding tools that are domain-specific is you
-;; generally have to reimplement the same things every single time. With
-;; lein-new, you have this little library that your templates can use.
-;; It has all the things a template is likely to need:
-;; * an easy way to generate files and namespaces
-;; * a way to render files written with a flexible template language
-;; * a way to get those files off of the classpath transparently
 (ns leiningen.new.templates
-  (:require [clojure.java.io :as io]
+  (:require [boot.util :as util]
+            [clojure.java.io :as io]
             [clojure.string :as string]
-            [leiningen.core.eval :as eval]
-            [leiningen.core.user :as user]
-            [leiningen.core.main :as main]
             [stencil.core :as stencil])
   (:import (java.util Calendar)))
 
@@ -28,8 +16,8 @@
 (defn fix-line-separators
   "Replace all \\n with system specific line separators."
   [s]
-  (let [line-sep (if (user/getenv "LEIN_NEW_UNIX_NEWLINES") "\n"
-                     (user/getprop "line.separator"))]
+  (let [line-sep (if (System/getenv "LEIN_NEW_UNIX_NEWLINES") "\n"
+                     (System/getProperty "line.separator"))]
     (string/replace s "\n" line-sep)))
 
 (defn slurp-to-lf
@@ -115,22 +103,11 @@
 ;; libraries. Though they are welcome to if they need.
 (def render-text stencil/render-string)
 
-;; Templates are expected to store their mustache template files in
-;; `leiningen/new/<template>/`. We have our convention of where templates
-;; will be on the classpath but we still have to know what the template's
-;; name is in order to know where this directory is and thus where to look
-;; for mustache template files. Since we're likely to be rendering a number
-;; of templates, we don't want to have to pass the name of the template every
-;; single time. We've also avoided magic so far, so a dynamic var and accompanying
-;; macro to set it is not in our game plan. Instead, our function for rendering
-;; templates on the classpath will be a function returned from this higher-order
-;; function. This way, we can say the name of our template just once and our
-;; render function will always know.
 (defn renderer
   "Create a renderer function that looks for mustache templates in the
   right place given the name of your template. If no data is passed, the
   file is simply slurped and the content returned unchanged.
-  
+
   render-fn - Optional rendering function that will be used in place of the
               default renderer. This allows rendering templates that contain
               tags that conflic with the Stencil renderer such as {{..}}."
@@ -142,10 +119,8 @@
           (if data
             (render (slurp-resource resource) data)
             (io/reader resource))
-          (main/abort (format "Template resource '%s' not found." path)))))))
+          (util/exit-error (println (format "Template resource '%s' not found." path))))))))
 
-;; We  provide a hier order function which returns  a function to generate
-;; binary resources such as images placed in `leiningen/new/<template>/` 
 (defn raw-resourcer
   "Create a renderer function that looks for raw files in the
   right place given the name of your template."
@@ -154,7 +129,7 @@
     (let [path (string/join "/" ["leiningen" "new" (sanitize name) file])]
       (if-let [resource (io/resource path)]
         (io/input-stream resource)
-        (main/abort (format "File '%s' not found." path))))))
+        (util/exit-error (println (format "File '%s' not found." path)))))))
 
 ;; Our file-generating function, `->files` is very simple. We'd like
 ;; to keep it that way. Sometimes you need your file paths to be
@@ -186,7 +161,7 @@
   is created in the correct directory."
   [{:keys [name] :as data} & paths]
   (let [dir (or *dir*
-                (-> (System/getProperty "leiningen.original.pwd")
+                (-> (System/getProperty "user.dir")
                     (io/file name) (.getPath)))]
     (if (or (= "." dir) (.mkdir (io/file dir)) *force?*)
       (doseq [path paths]
@@ -199,6 +174,6 @@
             (io/copy content (io/file path))
             (when (:executable options)
               (.setExecutable path true)))))
-      (main/info (str "Could not create directory " dir
-                      ". Maybe it already exists?"
-                      "  See also :force or --force")))))
+      (println (str "Could not create directory " dir
+                    ". Maybe it already exists?"
+                    "  See also :force or --force")))))
