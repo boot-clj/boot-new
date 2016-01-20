@@ -1,8 +1,8 @@
-(ns boot.new.plugin
+(ns boot.new.task
   (:require [boot.new.templates :refer [renderer sanitize year date ->files]]))
 
-(defn plugin
-  "A Boot plugin task template."
+(defn task
+  "A Boot task template."
   [^String name]
   (let [render (renderer "task")
         unprefixed (if (.startsWith name "boot-")
