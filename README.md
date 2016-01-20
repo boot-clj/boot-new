@@ -13,7 +13,7 @@ For other options, ask `new` for help:
 
     boot -d seancorfield/boot-new new -h
 
-Currently all of the basic options from Leiningen's `new` task are supported, and the built-in templates (`app`, `default`, `task`, `template`) are works in progress.
+Currently all of the basic options from Leiningen's `new` task are supported, and basic versions of the built-in templates (`app`, `default`, `task`, `template`) are available..
 
 ## Boot Templates
 

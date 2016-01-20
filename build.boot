@@ -3,7 +3,7 @@
                           [leiningen-core "2.5.3"]
                           [stencil "0.5.0"]])
 
-(def version "0.2.0-SNAPSHOT")
+(def version "0.2.0")
 
 (task-options!
  pom {:project     'seancorfield/boot-new
@@ -18,5 +18,5 @@
   (comp (pom) (jar) (install)))
 
 (deftask deploy
-  [g gpg-sign bool "Sign jar using GPG private key."]
-  (comp (pom) (jar) (apply push (mapcat identity *opts*))))
+  []
+  (comp (pom) (jar) (push)))
