@@ -4,6 +4,7 @@
 (set-env! :resource-paths #{"resources" "src"}
           :source-paths   #{"test"}
           :dependencies   '[[org.clojure/clojure "RELEASE"]
+                            [seancorfield/boot-new "0.2.0"]
                             [adzerk/boot-test "RELEASE" :scope "test"]])
 
 (task-options!
@@ -20,4 +21,5 @@
   []
   (comp (pom) (jar) (install)))
 
-(require '[adzerk.boot-test :refer [test]])
+(require '[adzerk.boot-test :refer [test]]
+         '[boot.new :refer [new]])
