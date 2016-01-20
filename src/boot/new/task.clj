@@ -1,16 +1,18 @@
 (ns boot.new.task
-  (:require [boot.new.templates :refer [renderer sanitize year date ->files]]))
+  "Generate a Boot task project."
+  (:require [boot.new.templates :refer [renderer year date project-name
+                                        ->files sanitize-ns name-to-path
+                                        multi-segment]]))
 
 (defn task
   "A Boot task template."
-  [^String name]
+  [name]
   (let [render (renderer "task")
-        unprefixed (if (.startsWith name "boot-")
-                     (subs name 5)
-                     name)
-        data {:name name
-              :unprefixed-name unprefixed
-              :sanitized (sanitize unprefixed)
+        main-ns (multi-segment (sanitize-ns name))
+        data {:raw-name name
+              :name (project-name name)
+              :namespace main-ns
+              :nested-dirs (name-to-path main-ns)
               :year (year)
               :date (date)}]
     (println (str "Generating a fresh Boot task called " name "."))
@@ -19,6 +21,6 @@
              ["README.md" (render "README.md" data)]
              [".gitignore" (render "gitignore" data)]
              [".hgignore" (render "hgignore" data)]
-             ["src/boot/{{sanitized}}.clj" (render "name.clj" data)]
+             ["src/{{nested-dirs}}.clj" (render "name.clj" data)]
              ["LICENSE" (render "LICENSE" data)]
              ["CHANGELOG.md" (render "CHANGELOG.md" data)])))

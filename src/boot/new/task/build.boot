@@ -20,4 +20,8 @@
   []
   (comp (pom) (jar) (install)))
 
-(require '[adzerk.boot-test :refer [test]])
+(require '[adzerk.boot-test :refer [test]]
+         '[{{namespace}} :refer [{{name}}-simple
+                                 {{name}}-pre
+                                 {{name}}-post
+                                 {{name}}-pass-thru]])

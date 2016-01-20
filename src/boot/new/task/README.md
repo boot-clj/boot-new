@@ -1,21 +1,21 @@
 # {{name}}
 
-A Leiningen plugin to do many wonderful things.
+A Boot task to do many wonderful things.
 
 ## Usage
 
-FIXME: Use this for user-level plugins:
+FIXME: explanation
 
-Put `[{{name}} "0.1.0-SNAPSHOT"]` into the `:plugins` vector of your `:user`
-profile.
+Run the `{{name}}-pre` task:
 
-FIXME: Use this for project-level plugins:
+    $ boot {{name}}-pre
 
-Put `[{{name}} "0.1.0-SNAPSHOT"]` into the `:plugins` vector of your project.clj.
+To use this in your project, add `[{{raw-name}} "0.1.0-SNAPSHOT"]` to your `:dependencies`
+and then require the task:
 
-FIXME: and add an example usage that actually makes sense:
+    (require '[{{namespace}} :refer [{{name}}-pre]])
 
-    $ lein {{unprefixed-name}}
+Other tasks include: `{{name}}-simple`, `{{name}}-post`, `{{name}}-pass-thru`.
 
 ## License
 
