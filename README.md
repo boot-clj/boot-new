@@ -39,7 +39,7 @@ The intent is that all of the basic options from Leiningen's `new` task are supp
 
 ## Boot Templates
 
-Boot templates are very similar to Leiningen templates but have an artifact name based on `boot-template` instead of `lein-template` and `boot` instead of `leiningen` in all the namespaces names. The built-in templates for `boot-new` are Boot templates, that produce Boot projects. In particular the `boot.new.templates` namespace provides functions such as `renderer` and `->files` that are the equivalent of the ones found in `leiningen.new.templates` when writing a Leiningen Template.
+Boot templates are very similar to Leiningen templates but have an artifact name based on `boot-template` instead of `lein-template` and uses `boot` instead of `leiningen` in all the namespace names. In particular the `boot.new.templates` namespace provides functions such as `renderer` and `->files` that are the equivalent of the ones found in `leiningen.new.templates` when writing a Leiningen Template. The built-in templates are Boot templates, that produce Boot projects.
 
 ## Roadmap
 
