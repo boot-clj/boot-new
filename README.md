@@ -1,8 +1,8 @@
-[![Clojars Project](https://img.shields.io/clojars/v/seancorfield/boot-new.svg)](https://clojars.org/seancorfield/boot-new)
-[![Stories in Ready](https://badge.waffle.io/seancorfield/boot-new.png?label=ready&title=Ready)](https://waffle.io/seancorfield/boot-new)
 # boot-new
 
 A Boot task that generates projects from Leiningen templates or Boot templates.
+
+[![Clojars Project](https://img.shields.io/clojars/v/seancorfield/boot-new.svg)](https://clojars.org/seancorfield/boot-new)
 
 ## Getting Started
 
@@ -42,6 +42,8 @@ The intent is that all of the basic options from Leiningen's `new` task are supp
 Boot templates are very similar to Leiningen templates but have an artifact name based on `boot-template` instead of `lein-template` and `boot` instead of `leiningen` in all the namespaces names. The built-in templates for `boot-new` are Boot templates, that produce Boot projects. In particular the `boot.new.templates` namespace provides functions such as `renderer` and `->files` that are the equivalent of the ones found in `leiningen.new.templates` when writing a Leiningen Template.
 
 ## Roadmap
+
+[![Stories in Ready](https://badge.waffle.io/seancorfield/boot-new.png?label=ready&title=Ready)](https://waffle.io/seancorfield/boot-new)
 
 * Add "generate" task that can add new pieces to an existing project, based on a template.
 
