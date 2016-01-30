@@ -38,6 +38,8 @@
                                                          *use-snapshots?*   "(0.0.0,)"
                                                          :else              "RELEASE")]])
                   (reset! selected :leiningen)
+                  ;; fetch Leiningen Core so template can use it:
+                  (boot/merge-env! :dependencies '[[leiningen-core "2.5.3"]])
                   (catch Exception e
                     (reset! failure e)))))))]
     (if @selected
