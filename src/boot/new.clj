@@ -10,6 +10,7 @@
             [leiningen.new.templates :as lnt])
   (:import java.io.FileNotFoundException))
 
+(def ^:dynamic *debug* nil)
 (def ^:dynamic *use-snapshots?* false)
 (def ^:dynamic *template-version* nil)
 
@@ -29,6 +30,9 @@
                                                      :else              "RELEASE")]])
               (reset! selected :boot)
               (catch Exception e
+                (when (and *debug* (> *debug* 2))
+                  (println "Unable to find Boot template:")
+                  (clojure.stacktrace/print-stack-trace e))
                 (reset! failure e)
                 (try
                   (boot/merge-env! :dependencies [[(symbol (str template-name "/lein-template"))
@@ -37,14 +41,26 @@
                                                          :else              "RELEASE")]])
                   (reset! selected :leiningen)
                   ;; fetch Leiningen Core so template can use it:
-                  (boot/merge-env! :dependencies '[[leiningen-core "2.5.3"]])
+                  (boot/merge-env! :dependencies '[[leiningen-core "2.5.3"]
+                                                   [slingshot "0.10.3"]])
                   (catch Exception e
+                    (when (and *debug* (> *debug* 1))
+                      (println "Unable to find Leiningen template:")
+                      (clojure.stacktrace/print-stack-trace e))
                     (reset! failure e)))))))]
+    (when *debug*
+      (println "Output from locating template:")
+      (println output))
     (if @selected
       (try
         (require (symbol (str (name @selected) ".new." template-name)))
         @selected
         (catch Exception e
+          (when *debug*
+            (when (> *debug* 3)
+              (println "Boot environment at failure:" (boot/get-env)))
+            (println "Unable to require the template symbol:")
+            (clojure.stacktrace/print-stack-trace e))
           (util/exit-error (println "Could not load template, failed with:" (.getMessage e)))))
       (util/exit-error (println output)
                        (println "Could not load template, failed with:" (.getMessage @failure))))))
@@ -110,7 +126,8 @@ specify the template with -t / --template."
    s show                      bool  "Show documentation for the template."
    S snapshot                  bool  "Look for a SNAPSHOT version of the template."
    t template         TEMPLATE str   "the template to use"
-   V template-version VER      str   "the version of the template to use"]
+   V template-version VER      str   "the version of the template to use"
+   v verbose                   int   "Be increasingly verbose."]
 
   (let [template (or template "default")]
 
@@ -122,7 +139,8 @@ specify the template with -t / --template."
             (not name)
             (util/exit-error (println "Project name is required (-n, --name)."))
 
-            :else (binding [*use-snapshots?*   snapshot
+            :else (binding [*debug*            verbose
+                            *use-snapshots?*   snapshot
                             *template-version* template-version
                             bnt/*dir*          to-dir
                             bnt/*force?*       force
