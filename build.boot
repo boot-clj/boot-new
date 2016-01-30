@@ -1,7 +1,7 @@
 (set-env! :resource-paths #{"src"}
           :dependencies '[[stencil "0.5.0"]])
 
-(def version "0.3.0-SNAPSHOT")
+(def version "0.3.0")
 
 (task-options!
  pom {:project     'seancorfield/boot-new
