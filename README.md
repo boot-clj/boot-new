@@ -1,4 +1,4 @@
-[![Clojars Project](https://img.shields.io/clojars/v/seancorfield/boot-new.svg)]
+[![Clojars Project](https://img.shields.io/clojars/v/seancorfield/boot-new.svg)](https://clojars.org/seancorfield/boot-new)
 [![Stories in Ready](https://badge.waffle.io/seancorfield/boot-new.png?label=ready&title=Ready)](https://waffle.io/seancorfield/boot-new)
 # boot-new
 
