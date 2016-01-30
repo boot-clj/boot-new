@@ -6,9 +6,7 @@
   (:require [boot.core :as boot :refer [deftask]]
             [boot.new.templates :as bnt]
             [boot.util :as util]
-
-            [bultitude.core :as bultitude]
-
+            ;; this is boot-new's version:
             [leiningen.new.templates :as lnt])
   (:import java.io.FileNotFoundException))
 

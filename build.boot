@@ -1,6 +1,5 @@
 (set-env! :resource-paths #{"src"}
-          :dependencies '[[bultitude "0.2.8"]
-                          [stencil "0.5.0"]])
+          :dependencies '[[stencil "0.5.0"]])
 
 (def version "0.3.0-SNAPSHOT")
 
