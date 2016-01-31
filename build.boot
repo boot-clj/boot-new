@@ -1,7 +1,8 @@
 (set-env! :resource-paths #{"src"}
-          :dependencies '[[stencil "0.5.0"]])
+          :dependencies '[[stencil "0.5.0"
+                           :exclusions [org.clojure/clojure]]])
 
-(def version "0.3.1-SNAPSHOT")
+(def version "0.3.1")
 
 (task-options!
  pom {:project     'seancorfield/boot-new
