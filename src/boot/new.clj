@@ -35,14 +35,13 @@
                   (clojure.stacktrace/print-stack-trace e))
                 (reset! failure e)
                 (try
-                  (boot/merge-env! :dependencies [[(symbol (str template-name "/lein-template"))
+                  (boot/merge-env! :dependencies [['leiningen-core "2.5.3"]
+                                                  ['slingshot "0.10.3"]
+                                                  [(symbol (str template-name "/lein-template"))
                                                    (cond *template-version* *template-version*
                                                          *use-snapshots?*   "(0.0.0,)"
                                                          :else              "RELEASE")]])
                   (reset! selected :leiningen)
-                  ;; fetch Leiningen Core so template can use it:
-                  (boot/merge-env! :dependencies '[[leiningen-core "2.5.3"]
-                                                   [slingshot "0.10.3"]])
                   (catch Exception e
                     (when (and *debug* (> *debug* 1))
                       (println "Unable to find Leiningen template:")
