@@ -130,6 +130,8 @@ specify the template with -t / --template."
    V template-version VER      str   "the version of the template to use"
    v verbose                   int   "Be increasingly verbose."]
 
+  ;; suppress target warning since it makes no sense for boot-new
+  (System/setProperty "BOOT_EMIT_TARGET" "no")
   (let [template (or template "default")]
 
     (boot/with-pass-thru fs
