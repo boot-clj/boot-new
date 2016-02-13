@@ -41,11 +41,25 @@ The intent is that all of the basic options from Leiningen's `new` task are supp
 
 Boot templates are very similar to Leiningen templates but have an artifact name based on `boot-template` instead of `lein-template` and uses `boot` instead of `leiningen` in all the namespace names. In particular the `boot.new.templates` namespace provides functions such as `renderer` and `->files` that are the equivalent of the ones found in `leiningen.new.templates` when writing a Leiningen Template. The built-in templates are Boot templates, that produce Boot projects.
 
+## Boot Generators
+
+_Currently available in 0.4.0-SNAPSHOT._
+
+Whereas Boot templates will generate an entire new project in a new directory, Boot generators are intended to add / modify code in an existing project. `boot-new` will run a generator with the `-g type` or `-g type=name` options. The `type` specifies the type of generator to use. The `name` is the main argument that is passed to the generator.
+
+A Boot generator can be part of a project or a template. A generator `foo`, has a `boot.generate.foo/generate` function that accepts at least two arguments, `prefix` and the `name` specified in the `-g` / `--generate` option (which will be `nil` if no `name` was specified -- the generator should validate that). `prefix` specifies the directory in which to perform the code generation and defaults to `src`. It can be overridden with the `-p` / `--prefix` option, but a generator is also free to simply ignore it anyway. In addition, any arguments specified by the `-a` / `--args` option are passed as additional arguments to the generator.
+
+The only built-in generator at present is `ns`:
+
+    boot -d seancorfield/boot-new new -g ns=foo.bar
+
+This will generate `src/foo/bar.clj` containing `(ns foo.bar)` (and a placeholder docstring). It will not overwrite an existing file unless you specify `-f` / `--force` (so generators are safe-by-default.
+
 ## Roadmap
 
 [![Stories in Ready](https://badge.waffle.io/seancorfield/boot-new.png?label=ready&title=Ready)](https://waffle.io/seancorfield/boot-new)
 
-* Add "generate" task that can add new pieces to an existing project, based on a template.
+* Improve the built-in template `template` so that it can be used to seed a new Boot project.
 
 ## License
 
