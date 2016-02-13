@@ -145,6 +145,7 @@
 
 (def ^{:dynamic true} *dir* nil)
 (def ^{:dynamic true} *force?* false)
+(def ^{:dynamic true} *overwrite?* true)
 
 ;; A template, at its core, is meant to generate files and directories that
 ;; represent a project. This is our way of doing that. `->files` is basically
@@ -174,9 +175,14 @@
                 path (template-path dir path data)
                 options (apply hash-map options)]
             (.mkdirs (.getParentFile path))
-            (io/copy content (io/file path))
+            (if (.exists path)
+              (if (or *overwrite?* *force?* (:overwrite options))
+                (io/copy content path)
+                (println (str path " exists."
+                              " Use -f / --force to overwrite it.")))
+              (io/copy content path))
             (when (:executable options)
               (.setExecutable path true)))))
       (println (str "Could not create directory " dir
                     ". Maybe it already exists?"
-                    "  See also :force or --force")))))
+                    "  Use -f / --force to overwrite it.")))))

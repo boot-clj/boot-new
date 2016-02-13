@@ -3,7 +3,8 @@
   Adapted from leiningen.new, with permission of the Leiningen team."
   {:boot/export-tasks true}
   (:refer-clojure :exclude [new])
-  (:require [boot.core :as boot :refer [deftask]]
+  (:require [clojure.string :as str]
+            [boot.core :as boot :refer [deftask]]
             [boot.new.templates :as bnt]
             [boot.util :as util]
             ;; this is boot-new's version:
@@ -105,6 +106,25 @@
     (util/exit-error (println "Project names must be valid Clojure symbols."))
     :else (apply (resolve-template template-name) project-name args)))
 
+(defn generate-code
+  "Given an optional template name, an optional path prefix, a list of
+  things to generate (type, type=name), and an optional set of arguments
+  for the generator, resolve the template (if provided), and then resolve
+  and apply each specified generator."
+  [template-name prefix generations args]
+  (when template-name (resolve-template template-name))
+  (doseq [thing generations]
+    (let [[gen-type gen-arg] (str/split thing #"=")
+          _ (try (require (symbol (str "boot.generate." gen-type))) (catch Exception _))
+          generator (resolve (symbol (str "boot.generate." gen-type) "generate"))]
+      (if generator
+        (apply generator prefix gen-arg args)
+        (println (str "Unable to resolve boot.generate."
+                      gen-type
+                      "/generate -- ignoring: "
+                      gen-type
+                      (when gen-arg (str "=\"" gen-arg "\""))))))))
+
 (defn template-show
   "Show details for a given template."
   [template-name]
@@ -122,29 +142,38 @@ follow those of `lein new` except that -n / --name is required and you
 specify the template with -t / --template."
   [a args             ARG      [str] "arguments for the template itself."
    f force                     bool  "Force Boot new to overwrite existing directory."
+   g generate         SPEC     [str] "things to generate"
    n name             NAME     str   "generated project name"
    o to-dir           DIR      str   "directory to use instead of NAME"
+   p prefix           PATH     str   "source directory prefix for generate (src)"
    s show                      bool  "Show documentation for the template."
    S snapshot                  bool  "Look for a SNAPSHOT version of the template."
    t template         TEMPLATE str   "the template to use"
    V template-version VER      str   "the version of the template to use"
    v verbose                   int   "Be increasingly verbose."]
 
-  (let [template (or template "default")]
+  (boot/with-pass-thru fs
 
-    (boot/with-pass-thru fs
+    (cond (and show (not template))
+          (util/exit-error (println "Template name is required (-t, --template) for show option (-s, --show)."))
 
-      (cond show
-            (template-show template)
+          show
+          (template-show template)
 
-            (not name)
-            (util/exit-error (println "Project name is required (-n, --name)."))
+          generate
+          (binding [bnt/*dir*        "."
+                    bnt/*force?*     force
+                    bnt/*overwrite?* false]
+            (generate-code template (or prefix "src") generate args))
 
-            :else (binding [*debug*            verbose
-                            *use-snapshots?*   snapshot
-                            *template-version* template-version
-                            bnt/*dir*          to-dir
-                            bnt/*force?*       force
-                            lnt/*dir*          to-dir
-                            lnt/*force?*       force]
-                    (create template name args))))))
+          (not name)
+          (util/exit-error (println "Project name is required (-n, --name)."))
+
+          :else (binding [*debug*            verbose
+                          *use-snapshots?*   snapshot
+                          *template-version* template-version
+                          bnt/*dir*          to-dir
+                          bnt/*force?*       force
+                          lnt/*dir*          to-dir
+                          lnt/*force?*       force]
+                  (create (or template "default") name args)))))
