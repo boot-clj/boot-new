@@ -175,12 +175,19 @@
                 path (template-path dir path data)
                 options (apply hash-map options)]
             (.mkdirs (.getParentFile path))
-            (if (.exists path)
-              (if (or *overwrite?* *force?* (:overwrite options))
-                (io/copy content path)
-                (println (str path " exists."
-                              " Use -f / --force to overwrite it.")))
-              (io/copy content path))
+            (cond (not (.exists path))
+                  (io/copy content path)
+
+                  (:append options)
+                  (with-open [w (io/writer path :append true)]
+                    (io/copy content w))
+
+                  (or *overwrite?* *force?* (:overwrite options))
+                  (io/copy content path)
+
+                  :else
+                  (println (str path " exists."
+                                " Use -f / --force to overwrite it.")))
             (when (:executable options)
               (.setExecutable path true)))))
       (println (str "Could not create directory " dir
