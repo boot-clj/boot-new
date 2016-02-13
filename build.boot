@@ -2,7 +2,7 @@
           :dependencies '[[stencil "0.5.0"
                            :exclusions [org.clojure/clojure]]])
 
-(def version "0.4.0-SNAPSHOT")
+(def version "0.4.0")
 
 (task-options!
  pom {:project     'seancorfield/boot-new

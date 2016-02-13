@@ -43,17 +43,19 @@ Boot templates are very similar to Leiningen templates but have an artifact name
 
 ## Boot Generators
 
-_Currently available in 0.4.0-SNAPSHOT._
-
 Whereas Boot templates will generate an entire new project in a new directory, Boot generators are intended to add / modify code in an existing project. `boot-new` will run a generator with the `-g type` or `-g type=name` options. The `type` specifies the type of generator to use. The `name` is the main argument that is passed to the generator.
 
 A Boot generator can be part of a project or a template. A generator `foo`, has a `boot.generate.foo/generate` function that accepts at least two arguments, `prefix` and the `name` specified in the `-g` / `--generate` option (which will be `nil` if no `name` was specified -- the generator should validate that). `prefix` specifies the directory in which to perform the code generation and defaults to `src`. It can be overridden with the `-p` / `--prefix` option, but a generator is also free to simply ignore it anyway. In addition, any arguments specified by the `-a` / `--args` option are passed as additional arguments to the generator.
 
-The only built-in generator at present is `ns`:
+The only built-in generators at present are `ns` and `defn`:
 
     boot -d seancorfield/boot-new new -g ns=foo.bar
 
 This will generate `src/foo/bar.clj` containing `(ns foo.bar)` (and a placeholder docstring). It will not overwrite an existing file unless you specify `-f` / `--force` (so generators are safe-by-default.
+
+    boot -d seancorfield/boot-new new -g defn=foo.bar/my-func
+
+If `src/foo/bar.clj` does not exist, it will be generated as a namespace first (using the `ns` generator above), then a definition for `my-func` will be appended to that file (with a placeholder docstring and a dummy argument vector of `[args]`).
 
 ## Roadmap
 
