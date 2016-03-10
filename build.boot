@@ -1,6 +1,6 @@
 (set-env! :resource-paths #{"src"})
 
-(def version "0.4.2-SNAPSHOT")
+(def version "0.4.2")
 
 (task-options!
  pom {:project     'seancorfield/boot-new
