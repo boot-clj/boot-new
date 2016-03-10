@@ -4,8 +4,7 @@
   support Leiningen templates which use symbols in this ns."
   (:require [boot.util :as util]
             [clojure.java.io :as io]
-            [clojure.string :as string]
-            [stencil.core :as stencil])
+            [clojure.string :as string])
   (:import (java.util Calendar)))
 
 (defn project-name
@@ -104,7 +103,10 @@
 ;; string. We can just provide this function instead. In doing so, it is much
 ;; less likely that template authors will have to pull in any external
 ;; libraries. Though they are welcome to if they need.
-(def render-text stencil/render-string)
+(defn render-text
+  [& args]
+  (require '[stencil.core :as stencil])
+  (apply (resolve 'stencil/render-string) args))
 
 (defn renderer
   "Create a renderer function that looks for mustache templates in the
