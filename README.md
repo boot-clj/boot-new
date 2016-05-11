@@ -1,4 +1,4 @@
-# boot-new
+# boot-new [![Join the chat at https://gitter.im/seancorfield/boot-new](https://badges.gitter.im/seancorfield/boot-new.svg)](https://gitter.im/seancorfield/boot-new?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 A Boot task that generates projects from Leiningen templates or Boot templates.
 
