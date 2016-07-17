@@ -2,7 +2,8 @@
 (def version "0.1.0-SNAPSHOT")
 
 (set-env! :resource-paths #{"resources" "src"}
-          :source-paths   #{"test"}
+          ;; uncomment this if you write tests for your template:
+          ;; :source-paths   #{"test"}
           :dependencies   '[[org.clojure/clojure "RELEASE"]
                             [seancorfield/boot-new "RELEASE"]
                             [adzerk/boot-test "RELEASE" :scope "test"]])
