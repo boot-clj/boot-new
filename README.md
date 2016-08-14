@@ -41,6 +41,26 @@ The intent is that all of the basic options from Leiningen's `new` task are supp
 
 Boot templates are very similar to Leiningen templates but have an artifact name based on `boot-template` instead of `lein-template` and uses `boot` instead of `leiningen` in all the namespace names. In particular the `boot.new.templates` namespace provides functions such as `renderer` and `->files` that are the equivalent of the ones found in `leiningen.new.templates` when writing a Leiningen Template. The built-in templates are Boot templates, that produce Boot projects.
 
+### Arguments
+
+Previous sections have revealed that it is possible to pass arguments to templates.
+
+```
+# Inside custom-template folder, relying on that template's boot new task.
+boot new -t custom-template -n project-name -a "arg1 arg2 arg3"
+```
+
+These arguments are accessible in the custom-template function as a second argument.
+
+```clj
+(defn custom-template
+  ([name]
+   (custom-template name " "))
+  ([name args]
+   (let [split-args (clojure.string/split args " ")]
+     (println name " has the following arguments: " split-args))))
+```
+
 ## Boot Generators
 
 Whereas Boot templates will generate an entire new project in a new directory, Boot generators are intended to add / modify code in an existing project. `boot-new` will run a generator with the `-g type` or `-g type=name` options. The `type` specifies the type of generator to use. The `name` is the main argument that is passed to the generator.
