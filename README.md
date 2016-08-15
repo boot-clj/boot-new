@@ -43,22 +43,19 @@ Boot templates are very similar to Leiningen templates but have an artifact name
 
 ### Arguments
 
-Previous sections have revealed that it is possible to pass arguments to templates.
+Previous sections have revealed that it is possible to pass arguments to templates. For multiple arguments, use one `-a` for each argument. For example:
 
 ```
 # Inside custom-template folder, relying on that template's boot new task.
-boot new -t custom-template -n project-name -a "arg1 arg2 arg3"
+boot new -t custom-template -n project-name -a arg1 -a arg2 -a arg3
 ```
 
 These arguments are accessible in the custom-template function as a second argument.
 
 ```clj
 (defn custom-template
-  ([name]
-   (custom-template name " "))
-  ([name args]
-   (let [split-args (clojure.string/split args " ")]
-     (println name " has the following arguments: " split-args))))
+  [name & args]
+  (println name " has the following arguments: " args))
 ```
 
 ## Boot Generators
