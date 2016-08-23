@@ -68,11 +68,11 @@ The only built-in generators at present are `ns` and `defn`:
 
     boot -d seancorfield/boot-new new -g ns=foo.bar
 
-This will generate `src/foo/bar.clj` containing `(ns foo.bar)` (and a placeholder docstring). It will not overwrite an existing file unless you specify `-f` / `--force` (so generators are safe-by-default.
+This will generate `src/foo/bar.clj` containing `(ns foo.bar)` (and a placeholder docstring). It will not replace an existing file unless you specify `-f` / `--force` (so `ns` generators are safe-by-default.
 
     boot -d seancorfield/boot-new new -g defn=foo.bar/my-func
 
-If `src/foo/bar.clj` does not exist, it will be generated as a namespace first (using the `ns` generator above), then a definition for `my-func` will be appended to that file (with a placeholder docstring and a dummy argument vector of `[args]`).
+If `src/foo/bar.clj` does not exist, it will be generated as a namespace first (using the `ns` generator above), then a definition for `my-func` will be appended to that file (with a placeholder docstring and a dummy argument vector of `[args]`). The generator does not check whether that `defn` already exists so it always appends a new `defn`.
 
 ## Roadmap
 
