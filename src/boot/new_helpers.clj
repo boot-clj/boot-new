@@ -72,7 +72,11 @@
                      :boot
                      (catch FileNotFoundException _
                        (resolve-remote-template template-name)))]
-    (resolve (symbol (str (name type) ".new." template-name) template-name))
+    (let [the-ns (str (name type) ".new." template-name)]
+      (if-let [sym (resolve (symbol the-ns template-name))]
+        sym
+        (util/exit-error (println "Found template" template-name "but could not resolve"
+                                  (str the-ns "/" template-name) "within it."))))
     (util/exit-error (println "Could not find template" template-name "on the classpath."))))
 
 (defn create*
