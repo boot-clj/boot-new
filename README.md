@@ -95,7 +95,6 @@ The `edn` generator uses the `file` generator internally, with a default extensi
 boot -d seancorfield/boot-new new -g edn=foo.bar -a "(ns foo.bar)"
 ```
 
-``
 ## Roadmap
 
 [![Stories in Ready](https://badge.waffle.io/seancorfield/boot-new.png?label=ready&title=Ready)](https://waffle.io/seancorfield/boot-new)
