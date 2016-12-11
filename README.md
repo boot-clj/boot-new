@@ -90,8 +90,12 @@ If `src/foo/bar.clj` does not exist, it will be generated as a namespace first (
 
 Both the `def` and `defn` generators create files using the `ns` generator above.
 
-The `edn` generator uses the `file` generator internally, it accepts `require`, `init-fns` and `compiler-options` as additional arguments.
+The `edn` generator uses the `file` generator internally, with a default extension of `"edn"`.
+```bash
+boot -d seancorfield/boot-new new -g edn=foo.bar -a "(ns foo.bar)"
+```
 
+``
 ## Roadmap
 
 [![Stories in Ready](https://badge.waffle.io/seancorfield/boot-new.png?label=ready&title=Ready)](https://waffle.io/seancorfield/boot-new)
