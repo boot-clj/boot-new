@@ -1,5 +1,6 @@
 (ns boot.generate.edn
-  (:require [boot.new.templates :as tmpl]))
+  (:require [boot.generate.file :as gen-file]
+            [boot.new.templates :as tmpl]))
 
 (defn generate
   "Generate a new edn file relative to the prefix."
