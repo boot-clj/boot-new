@@ -69,6 +69,7 @@ There are currently a few built-in generators:
 - `ns`
 - `def`
 - `defn`
+- `edn`
 
 The `file` generator creates files relative to the prefix. It optionally accepts a body, file extension, and append? argument.
 ```bash
