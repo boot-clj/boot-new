@@ -5,7 +5,7 @@
           ;; uncomment this if you write tests for your template:
           ;; :source-paths   #{"test"}
           :dependencies   '[[org.clojure/clojure "RELEASE"]
-                            [seancorfield/boot-new "RELEASE"]
+                            [boot/new "RELEASE"]
                             [adzerk/boot-test "RELEASE" :scope "test"]])
 
 (task-options!

@@ -1,14 +1,14 @@
-# boot-new [![Join the chat at https://gitter.im/seancorfield/boot-new](https://badges.gitter.im/seancorfield/boot-new.svg)](https://gitter.im/seancorfield/boot-new?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+# boot-new
 
 A Boot task that generates projects from Leiningen templates or Boot templates.
 
-[![Clojars Project](https://img.shields.io/clojars/v/seancorfield/boot-new.svg)](https://clojars.org/seancorfield/boot-new)
+[![Clojars Project](https://img.shields.io/clojars/v/boot/new.svg)](https://clojars.org/boot/new)
 
 ## Getting Started
 
 Create a basic application:
 
-    boot -d seancorfield/boot-new new -t app -n myapp
+    boot -d boot/new new -t app -n myapp
     cd myapp
     boot run
 
@@ -23,9 +23,9 @@ Built-in templates are:
 
 You can specify a template and a project name:
 
-    boot -d seancorfield/boot-new new -t template-name -n project-name
+    boot -d boot/new new -t template-name -n project-name
 
-`boot-new` will look for `template-name/boot-template` (on Clojars and Maven Central). If it doesn't find a Boot Template (see below), it will look for `template-name/lein-template` instead. `boot-new` should be able to run any existing Leiningen template (if you find one that doesn't work, [please tell me about it](https://github.com/seancorfield/boot-new/issues)!). `boot-new` will then generate a new project folder called `project-name` containing files generated from the specified `template-name`.
+`boot-new` will look for `template-name/boot-template` (on Clojars and Maven Central). If it doesn't find a Boot Template (see below), it will look for `template-name/lein-template` instead. `boot-new` should be able to run any existing Leiningen template (if you find one that doesn't work, [please tell me about it](https://github.com/boot-clj/boot-new/issues)!). `boot-new` will then generate a new project folder called `project-name` containing files generated from the specified `template-name`.
 
 If the folder `project-name` already exists, `boot-new` will not overwrite it unless you specify the `-f` / `--force` option. You can override the folder name used with the `-o` / `--to-dir` option. By default, `boot-new` will look for the most recent stable release of the specified template. You can tell it to search for snapshots with the `-S` / `--snapshot` option, and you can specify a particular version to use with the `-V` / `--template-version` option. In general, the long-form option follows the naming used by Leiningen's `new` task for familiarity.
 
@@ -33,7 +33,7 @@ You can pass arguments through to the underlying template with the `-a` / `--arg
 
 For a full list of options, ask `new` for help:
 
-    boot -d seancorfield/boot-new new -h
+    boot -d boot/new new -h
 
 The intent is that all of the basic options from Leiningen's `new` task are supported, along with Boot-specific versions of the built-in templates (`app`, `default`, `task` -- instead of Leiningen's `plugin`, and `template`).
 
@@ -73,17 +73,17 @@ There are currently a few built-in generators:
 
 The `file` generator creates files relative to the prefix. It optionally accepts a body, file extension, and append? argument.
 ```bash
-boot -d seancorfield/boot-new new -g file=foo.bar -a "(ns foo.bar)" -a "clj"
+boot -d boot/new new -g file=foo.bar -a "(ns foo.bar)" -a "clj"
 ```
 
 The `ns` generator creates a clojure namespace by using the `file` generator and providing a few defaults.
 ```bash
-boot -d seancorfield/boot-new new -g ns=foo.bar
+boot -d boot/new new -g ns=foo.bar
 ```
 
 This will generate `src/foo/bar.clj` containing `(ns foo.bar)` (and a placeholder docstring). It will not replace an existing file unless you specify `-f` / `--force` (so `ns` generators are safe-by-default.
 ```bash
-boot -d seancorfield/boot-new new -g defn=foo.bar/my-func
+boot -d boot/new new -g defn=foo.bar/my-func
 ```
 
 If `src/foo/bar.clj` does not exist, it will be generated as a namespace first (using the `ns` generator above), then a definition for `my-func` will be appended to that file (with a placeholder docstring and a dummy argument vector of `[args]`). The generator does not check whether that `defn` already exists so it always appends a new `defn`.
@@ -92,17 +92,15 @@ Both the `def` and `defn` generators create files using the `ns` generator above
 
 The `edn` generator uses the `file` generator internally, with a default extension of `"edn"`.
 ```bash
-boot -d seancorfield/boot-new new -g edn=foo.bar -a "(ns foo.bar)"
+boot -d boot/new new -g edn=foo.bar -a "(ns foo.bar)"
 ```
 
 ## Roadmap
-
-[![Stories in Ready](https://badge.waffle.io/seancorfield/boot-new.png?label=ready&title=Ready)](https://waffle.io/seancorfield/boot-new)
 
 * Improve the built-in template `template` so that it can be used to seed a new Boot project.
 
 ## License
 
-Copyright © 2016 Sean Corfield and the Leiningen Team for much of the code -- thank you!
+Copyright © 2016-2017 Sean Corfield and the Leiningen Team for much of the code -- thank you!
 
 Distributed under the Eclipse Public License version 1.0.
