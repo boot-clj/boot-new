@@ -26,4 +26,4 @@
              ["test/{{nested-dirs}}_test.clj" (render "test.clj" data)]
              ["LICENSE" (render "LICENSE" data)]
              ["CHANGELOG.md" (render "CHANGELOG.md" data)]
-             "resources")))
+             "resources/.keep" "")))
