@@ -7,9 +7,10 @@
             [boot.util :as util]))
 
 (core/deftask new
-  "Generate a new project from a template. The long form arguments mostly
-follow those of `lein new` except that -n / --name is required and you
-specify the template with -t / --template."
+  "Generate a new project from a template
+  
+  The long form arguments mostly follow those of `lein new` except that -n / --name
+is required and you specify the template with -t / --template."
   [a args             ARG      [str] "arguments for the template itself."
    f force                     bool  "Force Boot new to overwrite existing directory."
    g generate         SPEC     [str] "things to generate"
