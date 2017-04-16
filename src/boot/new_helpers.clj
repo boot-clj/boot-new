@@ -19,14 +19,19 @@
   [template-name]
   (let [selected (atom nil)
         failure  (atom nil)
+        boot-name (str template-name "/boot-template")
+        boot-version (cond *template-version* *template-version*
+                           *use-snapshots?*   "(0.0.0,)"
+                           :else              "RELEASE")
+        lein-name (str template-name "/lein-template")
+        lein-version (cond *template-version* *template-version*
+                           *use-snapshots?*   "(0.0.0,)"
+                           :else              "RELEASE")
         output
         (with-out-str
           (binding [*err* *out*]
             (try
-              (core/merge-env! :dependencies [[(symbol (str template-name "/boot-template"))
-                                               (cond *template-version* *template-version*
-                                                     *use-snapshots?*   "(0.0.0,)"
-                                                     :else              "RELEASE")]])
+              (core/merge-env! :dependencies [[(symbol boot-name) boot-version]])
               (reset! selected :boot)
               (catch Exception e
                 (when (and *debug* (> *debug* 2))
@@ -36,10 +41,7 @@
                 (try
                   (core/merge-env! :dependencies [['leiningen-core "2.5.3"]
                                                   ['slingshot "0.10.3"]
-                                                  [(symbol (str template-name "/lein-template"))
-                                                   (cond *template-version* *template-version*
-                                                         *use-snapshots?*   "(0.0.0,)"
-                                                         :else              "RELEASE")]])
+                                                  [(symbol lein-name) lein-version]])
                   (reset! selected :leiningen)
                   (catch Exception e
                     (when (and *debug* (> *debug* 1))
@@ -62,8 +64,10 @@
             (when (> *debug* 1)
               (clojure.stacktrace/print-cause-trace e)))
           (util/exit-error (println "Could not load template, failed with:" (.getMessage e)))))
-      (util/exit-error (println output)
-                       (println "Could not load template, failed with:" (.getMessage @failure))))))
+      (do (util/fail "Unable to locate template artifact, tried coordinates:\n\t[%s \"%s\"]\n\t[%s \"%s\"]\n"
+                     boot-name boot-version lein-name lein-version)
+          (System/exit 0))
+      )))
 
 (defn resolve-template
   "Given a template name, resolve it to a symbol (or exit if not possible)."
