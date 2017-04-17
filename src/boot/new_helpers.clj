@@ -64,9 +64,9 @@
             (when (> *debug* 1)
               (clojure.stacktrace/print-cause-trace e)))
           (util/exit-error (println "Could not load template, failed with:" (.getMessage e)))))
-      (do (util/fail "Unable to locate template artifact, tried coordinates:\n\t[%s \"%s\"]\n\t[%s \"%s\"]\n"
-                     boot-name boot-version lein-name lein-version)
-          (System/exit 0))
+      (do
+        (util/fail "Unable to locate template artifact, tried coordinates:\n\t[%s \"%s\"]\n\t[%s \"%s\"]\n" boot-name boot-version lein-name lein-version)
+        (util/exit-error))
       )))
 
 (defn resolve-template
