@@ -17,16 +17,20 @@
   "Given a template name, attempt to resolve it as a Boot template first,
   then as a Leiningen template. Return the type of template we found."
   [template-name]
-  (let [selected (atom nil)
-        failure  (atom nil)
+  (let [selected      (atom nil)
+        failure       (atom nil)
+        boot-tmp-name (str template-name "/boot-template")
+        lein-tmp-name (str template-name "/lein-template")
+        tmp-version   (cond *template-version* *template-version*
+                            *use-snapshots?*   "(0.0.0,)"
+                            :else              "RELEASE")
         output
         (with-out-str
           (binding [*err* *out*]
             (try
-              (core/merge-env! :dependencies [[(symbol (str template-name "/boot-template"))
-                                               (cond *template-version* *template-version*
-                                                     *use-snapshots?*   "(0.0.0,)"
-                                                     :else              "RELEASE")]])
+              (core/merge-env! :dependencies [[(symbol boot-tmp-name)
+                                               tmp-version]])
+
               (reset! selected :boot)
               (catch Exception e
                 (when (and *debug* (> *debug* 2))
@@ -36,10 +40,8 @@
                 (try
                   (core/merge-env! :dependencies [['leiningen-core "2.5.3"]
                                                   ['slingshot "0.10.3"]
-                                                  [(symbol (str template-name "/lein-template"))
-                                                   (cond *template-version* *template-version*
-                                                         *use-snapshots?*   "(0.0.0,)"
-                                                         :else              "RELEASE")]])
+                                                  [(symbol lein-tmp-name)
+                                                   tmp-version]])
                   (reset! selected :leiningen)
                   (catch Exception e
                     (when (and *debug* (> *debug* 1))
@@ -50,20 +52,29 @@
       (println "Output from locating template:")
       (println output))
     (if @selected
-      (try
-        (require (symbol (str (name @selected) ".new." template-name)))
-        @selected
-        (catch Exception e
-          (when *debug*
-            (when (> *debug* 3)
-              (println "Boot environment at failure:" (core/get-env)))
-            (println "Unable to require the template symbol:")
-            (clojure.stacktrace/print-stack-trace e)
-            (when (> *debug* 1)
-              (clojure.stacktrace/print-cause-trace e)))
-          (util/exit-error (println "Could not load template, failed with:" (.getMessage e)))))
+      (let [sym-name (str (name @selected) ".new." template-name)]
+        (try
+          (require (symbol sym-name))
+          @selected
+          (catch Exception e
+            (when *debug*
+              (when (> *debug* 3)
+                (println "Boot environment at failure:" (core/get-env)))
+              (println "Unable to require the template symbol:" sym-name)
+              (clojure.stacktrace/print-stack-trace e)
+              (when (> *debug* 1)
+                (clojure.stacktrace/print-cause-trace e)))
+            (util/exit-error (println "Could not load template, require of"
+                                      sym-name
+                                      "failed with:" (.getMessage e))))))
       (util/exit-error (println output)
-                       (println "Could not load template, failed with:" (.getMessage @failure))))))
+                       (println "Failed with:" (.getMessage @failure))
+                       (println "Could not load artifact for template:" template-name)
+                       (println (format (str "\tTried coordinates:\n"
+                                             "\t\t[%s \"%s\"]\n"
+                                             "\t\t[%s \"%s\"]")
+                                        boot-tmp-name tmp-version
+                                        lein-tmp-name tmp-version))))))
 
 (defn resolve-template
   "Given a template name, resolve it to a symbol (or exit if not possible)."
