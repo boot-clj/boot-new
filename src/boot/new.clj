@@ -8,7 +8,7 @@
 
 (core/deftask new
   "Generate a new project from a template
-  
+
   The long form arguments mostly follow those of `lein new` except that -n / --name
 is required and you specify the template with -t / --template."
   [a args             ARG      [str] "arguments for the template itself."
@@ -25,7 +25,7 @@ is required and you specify the template with -t / --template."
 
   ;; suppress target warning since it makes no sense for boot-new
   (System/setProperty "BOOT_EMIT_TARGET" "no")
-  (core/merge-env! :dependencies '[[stencil "0.5.0" :exclusions [org.clojure/clojure]]])
+  (core/merge-env! :dependencies '[[stencil "0.5.0" :exclusions [org.clojure/clojure org.clojure/core.cache]]])
 
   (core/with-pass-thru fs
     (require '[boot.new-helpers :as helpers])
