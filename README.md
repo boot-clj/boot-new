@@ -41,7 +41,7 @@ The intent is that all of the basic options from Leiningen's `new` task are supp
 
 Boot templates are very similar to Leiningen templates but have an artifact name based on `boot-template` instead of `lein-template` and uses `boot` instead of `leiningen` in all the namespace names. In particular the `boot.new.templates` namespace provides functions such as `renderer` and `->files` that are the equivalent of the ones found in `leiningen.new.templates` when writing a Leiningen Template. The built-in templates are Boot templates, that produce Boot projects.
 
-To develop a new template, run `boot -d boot/new -t template -n my-template`.  This will generate a project whose `build.boot` has `(def project 'my-template/boot-template)`, with version `0.1.0-SNAPSHOT`. To test it, you will need to build and install it locally (the generated `build.boot` contains a `build` task for this purpose) and then use it to create a project, using either `--snapshot` or `--template-version` so `boot-new` will know which version to use. By default, it looks for the most recent non-SNAPSHOT release on clojars.org.
+To develop a new template, run `boot -d boot/new new -t template -n my-template`.  This will generate a project whose `build.boot` has `(def project 'my-template/boot-template)`, with version `0.1.0-SNAPSHOT`. To test it, you will need to build and install it locally (the generated `build.boot` contains a `build` task for this purpose) and then use it to create a project, using either `--snapshot` or `--template-version` so `boot-new` will know which version to use. By default, it looks for the most recent non-SNAPSHOT release on clojars.org.
 
 ### Arguments
 
