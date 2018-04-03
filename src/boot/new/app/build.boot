@@ -15,6 +15,7 @@
       :scm         {:url "https://github.com/yourname/{{name}}"}
       :license     {"Eclipse Public License"
                     "http://www.eclipse.org/legal/epl-v10.html"}}
+ repl {:init-ns    '{{namespace}}}
  jar {:main        '{{namespace}}
       :file        (str "{{name}}-" version "-standalone.jar")})
 
