@@ -103,6 +103,6 @@ boot -d boot/new new -g edn=foo.bar -a "(ns foo.bar)"
 
 ## License
 
-Copyright © 2016-2017 Sean Corfield and the Leiningen Team for much of the code -- thank you!
+Copyright © 2016-2018 Sean Corfield and the Leiningen Team for much of the code -- thank you!
 
 Distributed under the Eclipse Public License version 1.0.
